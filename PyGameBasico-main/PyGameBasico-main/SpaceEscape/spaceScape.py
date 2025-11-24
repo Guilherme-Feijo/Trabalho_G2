@@ -34,8 +34,8 @@ ASSETS = {
     "background": "fundo_espacial.png",                         # imagem de fundo
     "player": "nave001.png",                                    # imagem da nave
     "meteor": "meteoro001.png",                                 # imagem do meteoro
-    "sound_point": "stab-f-01-brvhrtz-224599.mp3", # som ao desviar com sucesso
-    "sound_hit": "classic-game-action-positive-5-224402.mp3",                # som de colisão
+    "sound_point": "classic-game-action-positive-5-224402.mp3", # som ao desviar com sucesso
+    "sound_hit": "stab-f-01-brvhrtz-224599.mp3",                # som de colisão
     "music": "game-gaming-background-music-385611.mp3"          # música de fundo. direitos: Music by Maksym Malko from Pixabay
 }
 
