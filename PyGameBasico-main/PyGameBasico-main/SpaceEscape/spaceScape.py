@@ -63,16 +63,29 @@ def load_image(filename, fallback_color, size=None):
 background = load_image(ASSETS["background"], WHITE, (WIDTH, HEIGHT))
 player_img = load_image(ASSETS["player"], BLUE, (80, 60))
 
-# Frames do meteoro animado (2 imagens)
+# Frames do meteoro animado grande (2 imagens)
 meteor_frames = [
     load_image("Terror_eye-1.png", RED, (80, 80)),
     load_image("Terror_eye-2.png", RED, (80, 80))
 ]
 
-# Variáveis de animação do meteoro
-meteor_animation_index = 0     # qual frame está exibindo
-meteor_animation_timer = 0     # controla a troca de frame
-meteor_animation_speed = 50    # quanto menor o valor, mais rápida a animação
+# ----------------------------------------------------------
+# 👇 ADIÇÃO: FRAMES DO METEORO PEQUENO (animado)
+# ----------------------------------------------------------
+meteor_small_frames = [
+    load_image("minieye1.png", RED, (40, 40)),  # mesmo sprite, menor
+    load_image("minieye2.png", RED, (40, 40))
+]
+
+# Variáveis de animação do meteoro grande
+meteor_animation_index = 0
+meteor_animation_timer = 0
+meteor_animation_speed = 50
+
+# 👇 ADIÇÃO: Variáveis de animação do meteoro pequeno
+meteor_small_animation_index = 0
+meteor_small_animation_timer = 0
+meteor_small_animation_speed = 50
 
 # Função para carregar som com segurança
 def load_sound(filename):
@@ -95,69 +108,69 @@ if os.path.exists(ASSETS["music"]):
 player_rect = player_img.get_rect(center=(WIDTH // 2, HEIGHT - 60))  # posição inicial da nave
 player_speed = 7  # velocidade do jogador
 
-# Cria 5 meteoros em posições aleatórias
+# Cria 5 meteoros grandes em posições aleatórias
 meteor_list = []
 for _ in range(5):
     x = random.randint(0, WIDTH - 40)
     y = random.randint(-500, -40)
     meteor_list.append(pygame.Rect(x, y, 40, 40))
 
-meteor_speed = 3  # velocidade dos meteoros
+# 👇 Criar vários meteoros pequenos (ajuste o range para mais ou menos)
+meteor_small_list = []
+for _ in range(5):  # <<--- AQUI você escolhe a quantidade de meteoros pequenos
+    x = random.randint(0, WIDTH - 40)
+    y = random.randint(-300, -50)
+    meteor_small_list.append(pygame.Rect(x, y, 40, 40))
 
-score = 0    # pontuação
-lives = 3    # vidas do jogador
+
+meteor_speed = 3      # velocidade dos meteoros grandes
+meteor_small_speed = 5  # meteoro pequeno cai mais rápido (pode ajustar)
+
+score = 0
+lives = 3
 font = pygame.font.Font(None, 36)
 clock = pygame.time.Clock()
 running = True
 
-control_mode = "keyboard"  # modo de controle (teclado ou mouse)
+control_mode = "keyboard"
 
 # ----------------------------------------------------------
 # 🕹️ LOOP PRINCIPAL DO JOGO
 # ----------------------------------------------------------
 while running:
-    clock.tick(FPS)  # controla o FPS
-    screen.blit(background, (0, 0))  # desenha o fundo
+    clock.tick(FPS)
+    screen.blit(background, (0, 0))
 
-    # --- Tratamento de eventos ---
+    # --- Eventos ---
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-        # Troca entre teclado e mouse com SHIFT direito
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RSHIFT:
-                if control_mode == "keyboard":
-                    control_mode = "mouse"
-                else:
-                    control_mode = "keyboard"
+                control_mode = "mouse" if control_mode == "keyboard" else "keyboard"
 
     # --- Movimento do jogador ---
     if control_mode == "keyboard":
         keys = pygame.key.get_pressed()
-
         if keys[pygame.K_LEFT] and player_rect.left > 0:
             player_rect.x -= player_speed
-
         if keys[pygame.K_RIGHT] and player_rect.right < WIDTH:
             player_rect.x += player_speed
-
         if keys[pygame.K_UP] and player_rect.top > 0:
             player_rect.y -= player_speed
-
         if keys[pygame.K_DOWN] and player_rect.bottom < HEIGHT:
             player_rect.y += player_speed
+    else:
+        mx, my = pygame.mouse.get_pos()
+        player_rect.center = (mx, my)
 
-    elif control_mode == "mouse":
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        player_rect.centerx = mouse_x
-        player_rect.centery = mouse_y
-
-    # --- Movimento e lógica dos meteoros ---
+    # ------------------------------------------------------
+    # MOVIMENTO DOS METEOROS GRANDES
+    # ------------------------------------------------------
     for meteor in meteor_list:
-        meteor.y += meteor_speed  # meteoros caem
+        meteor.y += meteor_speed
 
-        # Se saiu da tela → reposiciona e soma ponto
         if meteor.y > HEIGHT:
             meteor.y = random.randint(-100, -40)
             meteor.x = random.randint(0, WIDTH - meteor.width)
@@ -165,7 +178,6 @@ while running:
             if sound_point:
                 sound_point.play()
 
-        # Se colidiu com o jogador
         if meteor.colliderect(player_rect):
             lives -= 1
             meteor.y = random.randint(-100, -40)
@@ -175,24 +187,60 @@ while running:
             if lives <= 0:
                 running = False
 
-        # Controle da animação (troca de frame)
-        meteor_animation_timer += 1
-        if meteor_animation_timer >= meteor_animation_speed:
-            meteor_animation_timer = 0
-            meteor_animation_index = (meteor_animation_index + 1) % 2
+    # ------------------------------------------------------
+    # 👇 ADIÇÃO: MOVIMENTO DO METEORO PEQUENO
+    # ------------------------------------------------------
+    for meteor_small in meteor_small_list:
+        meteor_small.y += meteor_small_speed
 
-    # --- Desenho dos elementos na tela ---
-    screen.blit(player_img, player_rect)  # desenha a nave
+        if meteor_small.y > HEIGHT:
+            meteor_small.y = random.randint(-200, -50)
+            meteor_small.x = random.randint(0, WIDTH - meteor_small.width)
+            score += 1
+            if sound_point:
+                sound_point.play()
 
-    # desenha todos os meteoros animados
+        if meteor_small.colliderect(player_rect):
+            lives -= 1
+            meteor_small.y = random.randint(-200, -50)
+            meteor_small.x = random.randint(0, WIDTH - meteor_small.width)
+            if sound_hit:
+                sound_hit.play()
+            if lives <= 0:
+                running = False
+
+    # ------------------------------------------------------
+    # ANIMAÇÃO DOS FRAMES
+    # ------------------------------------------------------
+    meteor_animation_timer += 1
+    if meteor_animation_timer >= meteor_animation_speed:
+        meteor_animation_timer = 0
+        meteor_animation_index = (meteor_animation_index + 1) % 2
+
+    # 👇 ADIÇÃO: animação meteoro pequeno
+    meteor_small_animation_timer += 1
+    if meteor_small_animation_timer >= meteor_small_animation_speed:
+        meteor_small_animation_timer = 0
+        meteor_small_animation_index = (meteor_small_animation_index + 1) % 2
+
+    # ------------------------------------------------------
+    # DESENHO NA TELA
+    # ------------------------------------------------------
+    screen.blit(player_img, player_rect)
+
+    # Desenha meteoros grandes
     for meteor in meteor_list:
         screen.blit(meteor_frames[meteor_animation_index], meteor)
 
-    # Exibe HUD (pontos e vidas)
+    # 👇 ADIÇÃO: desenha meteoro pequeno
+    for meteor_small in meteor_small_list:
+        screen.blit(meteor_small_frames[meteor_small_animation_index], meteor_small)
+
+    # HUD
     text = font.render(f"Pontos: {score}   Vidas: {lives}", True, WHITE)
     screen.blit(text, (10, 10))
 
-    pygame.display.flip()  # atualiza a tela
+    pygame.display.flip()
 
 # ----------------------------------------------------------
 # 🏁 TELA FINAL
@@ -207,7 +255,6 @@ screen.blit(end_text, (150, 260))
 screen.blit(final_score, (300, 300))
 pygame.display.flip()
 
-# Espera o jogador pressionar tecla ou fechar
 waiting = True
 while waiting:
     for event in pygame.event.get():
