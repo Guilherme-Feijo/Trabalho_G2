@@ -35,8 +35,8 @@ ASSETS = {
     "player": "nave001.png",                                    # imagem da nave
     "meteor": "meteoro001.png",                                 # imagem do meteoro
     "sound_point": "classic-game-action-positive-5-224402.mp3", # som ao desviar com sucesso
-    "sound_hit": "stab-f-01-brvhrtz-224599.mp3",                # som de colisão
-    "music": "game-gaming-background-music-385611.mp3"          # música de fundo. direitos: Music by Maksym Malko from Pixabay
+    "sound_hit": "harcore-terror-kick-74920.mp3",                # som de colisão
+    "music": "Terror8bits_song.mp3"          # música de fundo. direitos: Music by Maksym Malko from Pixabay
 }
 
 # ----------------------------------------------------------
@@ -66,11 +66,9 @@ def load_image(filename, fallback_color, size=None):
 # Carrega imagens
 background = load_image(ASSETS["background"], WHITE, (WIDTH, HEIGHT))
 player_img = load_image(ASSETS["player"], BLUE, (80, 60))
-meteor_img = load_image(ASSETS["meteor"], RED, (40, 40))
-
 meteor_frames = [
-    load_image("Terror_eye-1.png", RED, (40, 40)),
-    load_image("Terror_eye-2.png", RED, (40, 40))
+    load_image("Terror_eye-1.png", RED, (80, 80)),
+    load_image("Terror_eye-2.png", RED, (80, 80))
 ]
 
 meteor_animation_index = 0
@@ -104,7 +102,7 @@ for _ in range(5):
     x = random.randint(0, WIDTH - 40)
     y = random.randint(-500, -40)
     meteor_list.append(pygame.Rect(x, y, 40, 40))
-meteor_speed = 5
+meteor_speed = 3
 
 score = 0
 lives = 3
