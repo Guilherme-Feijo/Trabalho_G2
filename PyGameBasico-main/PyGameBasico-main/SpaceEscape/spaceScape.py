@@ -20,7 +20,7 @@ pygame.init()
 # ----------------------------------------------------------
 # 🔧 CONFIGURAÇÕES GERAIS DO JOGO
 # ----------------------------------------------------------
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1024, 536
 FPS = 60
 pygame.display.set_caption("🚀 Space Escape")
 
@@ -31,7 +31,7 @@ pygame.display.set_caption("🚀 Space Escape")
 # e troque apenas os nomes abaixo.
 
 ASSETS = {
-    "background": "fundo_espacial.png",                         # imagem de fundo
+    "background": "PlanoDeFundoTerror.png",                         # imagem de fundo
     "player": "nave001.png",                                    # imagem da nave
     "meteor": "meteoro001.png",                                 # imagem do meteoro
     "sound_point": "classic-game-action-positive-5-224402.mp3", # som ao desviar com sucesso
