@@ -20,37 +20,33 @@ pygame.init()
 # ----------------------------------------------------------
 # 🔧 CONFIGURAÇÕES GERAIS DO JOGO
 # ----------------------------------------------------------
-WIDTH, HEIGHT = 1024, 536
-FPS = 60
-pygame.display.set_caption("🚀 Space Escape")
+WIDTH, HEIGHT = 1024, 536   # tamanho da tela
+FPS = 60                    # taxa de atualização
+pygame.display.set_caption("🚀 Space Escape")  # título da janela
 
 # ----------------------------------------------------------
-# 🧩 SEÇÃO DE ASSETS (os alunos podem trocar os arquivos aqui)
+# 🧩 ASSETS DO JOGO
 # ----------------------------------------------------------
-# Dica: coloque as imagens e sons na mesma pasta do arquivo .py
-# e troque apenas os nomes abaixo.
-
 ASSETS = {
-    "background": "PlanoDeFundoTerror.png",                         # imagem de fundo
-    "player": "nave001.png",                                    # imagem da nave
-    "meteor": "meteoro001.png",                                 # imagem do meteoro
-    "sound_point": "classic-game-action-positive-5-224402.mp3", # som ao desviar com sucesso
-    "sound_hit": "harcore-terror-kick-74920.mp3",                # som de colisão
-    "music": "Terror8bits_song.mp3"          # música de fundo. direitos: Music by Maksym Malko from Pixabay
+    "background": "PlanoDeFundoTerror.png",  # imagem do fundo
+    "player": "nave001.png",                 # imagem da nave
+    "meteor": "meteoro001.png",              # imagem (não usada agora)
+    "sound_point": "classic-game-action-positive-5-224402.mp3",  # som ao ganhar ponto
+    "sound_hit": "harcore-terror-kick-74920.mp3",                # som ao perder vida
+    "music": "Terror8bits_song.mp3"          # música de fundo
 }
 
 # ----------------------------------------------------------
 # 🖼️ CARREGAMENTO DE IMAGENS E SONS
 # ----------------------------------------------------------
-# Cores para fallback (caso os arquivos não existam)
 WHITE = (255, 255, 255)
-RED = (255, 60, 60)
-BLUE = (60, 100, 255)
+RED   = (255, 60, 60)
+BLUE  = (60, 100, 255)
 
-# Tela do jogo
+# Cria a tela
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-# Função auxiliar para carregar imagens de forma segura
+# Função para carregar imagens com fallback (caso não exista o arquivo)
 def load_image(filename, fallback_color, size=None):
     if os.path.exists(filename):
         img = pygame.image.load(filename).convert_alpha()
@@ -58,25 +54,27 @@ def load_image(filename, fallback_color, size=None):
             img = pygame.transform.scale(img, size)
         return img
     else:
-        # Gera uma superfície simples colorida se a imagem não existir
+        # Cria um quadrado colorido se a imagem não existir
         surf = pygame.Surface(size or (50, 50))
         surf.fill(fallback_color)
         return surf
 
-# Carrega imagens
+# Carrega o fundo e o jogador
 background = load_image(ASSETS["background"], WHITE, (WIDTH, HEIGHT))
 player_img = load_image(ASSETS["player"], BLUE, (80, 60))
+
+# Frames do meteoro animado (2 imagens)
 meteor_frames = [
     load_image("Terror_eye-1.png", RED, (80, 80)),
     load_image("Terror_eye-2.png", RED, (80, 80))
 ]
 
-meteor_animation_index = 0
-meteor_animation_timer = 0
-meteor_animation_speed = 50  # quanto menor, mais rápido troca de frame
+# Variáveis de animação do meteoro
+meteor_animation_index = 0     # qual frame está exibindo
+meteor_animation_timer = 0     # controla a troca de frame
+meteor_animation_speed = 50    # quanto menor o valor, mais rápida a animação
 
-
-# Sons
+# Função para carregar som com segurança
 def load_sound(filename):
     if os.path.exists(filename):
         return pygame.mixer.Sound(filename)
@@ -85,45 +83,48 @@ def load_sound(filename):
 sound_point = load_sound(ASSETS["sound_point"])
 sound_hit = load_sound(ASSETS["sound_hit"])
 
-# Música de fundo (opcional)
+# Música de fundo (loop)
 if os.path.exists(ASSETS["music"]):
     pygame.mixer.music.load(ASSETS["music"])
     pygame.mixer.music.set_volume(0.3)
-    pygame.mixer.music.play(-1)  # loop infinito
+    pygame.mixer.music.play(-1)
 
 # ----------------------------------------------------------
-# 🧠 VARIÁVEIS DE JOGO
+# 🧠 VARIÁVEIS DO JOGO
 # ----------------------------------------------------------
-player_rect = player_img.get_rect(center=(WIDTH // 2, HEIGHT - 60))
-player_speed = 7
+player_rect = player_img.get_rect(center=(WIDTH // 2, HEIGHT - 60))  # posição inicial da nave
+player_speed = 7  # velocidade do jogador
 
+# Cria 5 meteoros em posições aleatórias
 meteor_list = []
 for _ in range(5):
     x = random.randint(0, WIDTH - 40)
     y = random.randint(-500, -40)
     meteor_list.append(pygame.Rect(x, y, 40, 40))
-meteor_speed = 3
 
-score = 0
-lives = 3
+meteor_speed = 3  # velocidade dos meteoros
+
+score = 0    # pontuação
+lives = 3    # vidas do jogador
 font = pygame.font.Font(None, 36)
 clock = pygame.time.Clock()
 running = True
 
-control_mode = "keyboard"  # opções: "keyboard" ou "mouse"
+control_mode = "keyboard"  # modo de controle (teclado ou mouse)
 
 # ----------------------------------------------------------
-# 🕹️ LOOP PRINCIPAL
+# 🕹️ LOOP PRINCIPAL DO JOGO
 # ----------------------------------------------------------
 while running:
-    clock.tick(FPS)
-    screen.blit(background, (0, 0))
+    clock.tick(FPS)  # controla o FPS
+    screen.blit(background, (0, 0))  # desenha o fundo
 
-    # --- Eventos ---
+    # --- Tratamento de eventos ---
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+        # Troca entre teclado e mouse com SHIFT direito
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RSHIFT:
                 if control_mode == "keyboard":
@@ -135,15 +136,15 @@ while running:
     if control_mode == "keyboard":
         keys = pygame.key.get_pressed()
 
-        # Movimento horizontal
         if keys[pygame.K_LEFT] and player_rect.left > 0:
             player_rect.x -= player_speed
+
         if keys[pygame.K_RIGHT] and player_rect.right < WIDTH:
             player_rect.x += player_speed
 
-        # Movimento vertical
         if keys[pygame.K_UP] and player_rect.top > 0:
             player_rect.y -= player_speed
+
         if keys[pygame.K_DOWN] and player_rect.bottom < HEIGHT:
             player_rect.y += player_speed
 
@@ -152,11 +153,11 @@ while running:
         player_rect.centerx = mouse_x
         player_rect.centery = mouse_y
 
-    # --- Movimento dos meteoros ---
+    # --- Movimento e lógica dos meteoros ---
     for meteor in meteor_list:
-        meteor.y += meteor_speed
+        meteor.y += meteor_speed  # meteoros caem
 
-        # Saiu da tela → reposiciona e soma pontos
+        # Se saiu da tela → reposiciona e soma ponto
         if meteor.y > HEIGHT:
             meteor.y = random.randint(-100, -40)
             meteor.x = random.randint(0, WIDTH - meteor.width)
@@ -164,7 +165,7 @@ while running:
             if sound_point:
                 sound_point.play()
 
-        # Colisão
+        # Se colidiu com o jogador
         if meteor.colliderect(player_rect):
             lives -= 1
             meteor.y = random.randint(-100, -40)
@@ -173,33 +174,40 @@ while running:
                 sound_hit.play()
             if lives <= 0:
                 running = False
+
+        # Controle da animação (troca de frame)
         meteor_animation_timer += 1
         if meteor_animation_timer >= meteor_animation_speed:
             meteor_animation_timer = 0
             meteor_animation_index = (meteor_animation_index + 1) % 2
 
-    # --- Desenha tudo ---
-    screen.blit(player_img, player_rect)
+    # --- Desenho dos elementos na tela ---
+    screen.blit(player_img, player_rect)  # desenha a nave
+
+    # desenha todos os meteoros animados
     for meteor in meteor_list:
         screen.blit(meteor_frames[meteor_animation_index], meteor)
 
-    # --- Exibe pontuação e vidas ---
+    # Exibe HUD (pontos e vidas)
     text = font.render(f"Pontos: {score}   Vidas: {lives}", True, WHITE)
     screen.blit(text, (10, 10))
 
-    pygame.display.flip()
+    pygame.display.flip()  # atualiza a tela
 
 # ----------------------------------------------------------
-# 🏁 TELA DE FIM DE JOGO
+# 🏁 TELA FINAL
 # ----------------------------------------------------------
 pygame.mixer.music.stop()
 screen.fill((20, 20, 20))
+
 end_text = font.render("Fim de jogo! Pressione qualquer tecla para sair.", True, WHITE)
 final_score = font.render(f"Pontuação final: {score}", True, WHITE)
+
 screen.blit(end_text, (150, 260))
 screen.blit(final_score, (300, 300))
 pygame.display.flip()
 
+# Espera o jogador pressionar tecla ou fechar
 waiting = True
 while waiting:
     for event in pygame.event.get():
