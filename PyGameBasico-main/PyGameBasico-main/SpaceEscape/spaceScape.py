@@ -102,6 +102,8 @@ font = pygame.font.Font(None, 36)
 clock = pygame.time.Clock()
 running = True
 
+control_mode = "keyboard"  # opções: "keyboard" ou "mouse"
+
 # ----------------------------------------------------------
 # 🕹️ LOOP PRINCIPAL
 # ----------------------------------------------------------
@@ -114,12 +116,33 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RSHIFT:
+                if control_mode == "keyboard":
+                    control_mode = "mouse"
+                else:
+                    control_mode = "keyboard"
+
     # --- Movimento do jogador ---
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and player_rect.left > 0:
-        player_rect.x -= player_speed
-    if keys[pygame.K_RIGHT] and player_rect.right < WIDTH:
-        player_rect.x += player_speed
+    if control_mode == "keyboard":
+        keys = pygame.key.get_pressed()
+
+        # Movimento horizontal
+        if keys[pygame.K_LEFT] and player_rect.left > 0:
+            player_rect.x -= player_speed
+        if keys[pygame.K_RIGHT] and player_rect.right < WIDTH:
+            player_rect.x += player_speed
+
+        # Movimento vertical
+        if keys[pygame.K_UP] and player_rect.top > 0:
+            player_rect.y -= player_speed
+        if keys[pygame.K_DOWN] and player_rect.bottom < HEIGHT:
+            player_rect.y += player_speed
+
+    elif control_mode == "mouse":
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        player_rect.centerx = mouse_x
+        player_rect.centery = mouse_y
 
     # --- Movimento dos meteoros ---
     for meteor in meteor_list:
