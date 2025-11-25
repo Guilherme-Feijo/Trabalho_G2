@@ -68,6 +68,16 @@ background = load_image(ASSETS["background"], WHITE, (WIDTH, HEIGHT))
 player_img = load_image(ASSETS["player"], BLUE, (80, 60))
 meteor_img = load_image(ASSETS["meteor"], RED, (40, 40))
 
+meteor_frames = [
+    load_image("Terror_eye-1.png", RED, (40, 40)),
+    load_image("Terror_eye-2.png", RED, (40, 40))
+]
+
+meteor_animation_index = 0
+meteor_animation_timer = 0
+meteor_animation_speed = 50  # quanto menor, mais rápido troca de frame
+
+
 # Sons
 def load_sound(filename):
     if os.path.exists(filename):
@@ -165,11 +175,15 @@ while running:
                 sound_hit.play()
             if lives <= 0:
                 running = False
+        meteor_animation_timer += 1
+        if meteor_animation_timer >= meteor_animation_speed:
+            meteor_animation_timer = 0
+            meteor_animation_index = (meteor_animation_index + 1) % 2
 
     # --- Desenha tudo ---
     screen.blit(player_img, player_rect)
     for meteor in meteor_list:
-        screen.blit(meteor_img, meteor)
+        screen.blit(meteor_frames[meteor_animation_index], meteor)
 
     # --- Exibe pontuação e vidas ---
     text = font.render(f"Pontos: {score}   Vidas: {lives}", True, WHITE)
